@@ -1,51 +1,8 @@
 (function() {
-  var Presentation, Slide, build_types, n_slides_global, recursiveDoBuilds, recursiveUndoBuilds, refreshVisibility,
+  var Presentation, Slide, build_types, n_slides_global,
     __slice = Array.prototype.slice;
 
   n_slides_global = 0;
-
-  recursiveDoBuilds = function(builds, cb) {
-    var b;
-    builds = builds.slice(0);
-    if (builds.length === 0) {
-      if (cb) cb();
-      return;
-    }
-    b = builds.shift();
-    return b["do"](function() {
-      return recursiveDoBuilds(builds, cb);
-    });
-  };
-
-  recursiveUndoBuilds = function(builds, cb, n) {
-    var b, n_prime;
-    if (n == null) n = void 0;
-    if (n === void 0) n = builds.length;
-    alert(n);
-    if (n === 0) {
-      if (cb) cb();
-      return;
-    }
-    b = builds[n - 1];
-    n_prime = n - 1;
-    return b.undo(function() {
-      return arguments.callee(builds, cb, n_prime);
-    });
-  };
-
-  refreshVisibility = function(parent) {
-    var includes;
-    includes = $('.include', parent);
-    return includes.each(function() {
-      var local_parent;
-      local_parent = $(this);
-      return $('svg', local_parent).each(function() {
-        var svg;
-        svg = $(this).remove();
-        return local_parent.append(svg);
-      });
-    });
-  };
 
   build_types = {
     appear: function(target) {
@@ -268,7 +225,21 @@
         this.first_show = false;
       }
       $(this.slide_div).show(0, cb);
-      return refreshVisibility(this.slide_div);
+      return this.refreshVisibility(this.slide_div);
+    };
+
+    Slide.prototype.refreshVisibility = function(parent) {
+      var includes;
+      includes = $('.include', parent);
+      return includes.each(function() {
+        var local_parent;
+        local_parent = $(this);
+        return $('svg', local_parent).each(function() {
+          var svg;
+          svg = $(this).remove();
+          return local_parent.append(svg);
+        });
+      });
     };
 
     Slide.prototype.hide = function() {
