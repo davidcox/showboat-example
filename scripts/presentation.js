@@ -430,7 +430,6 @@
         case 34:
         case 30:
           return this.advanceQueued();
-        case 84:
         case 67:
           return this.toggleControls();
         case 82:
