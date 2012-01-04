@@ -1,0 +1,241 @@
+/* Top-level structure */
+body {
+  margin: 0 0 0 0;
+  padding: 0 0 0 0;
+  width: 100%;
+  height: 100%;
+  /*width: 1024;
+  height: 768;*/
+  color: black;
+  background-color: white;
+  font-family: "Myriad Pro", "Myriad", sans-serif;
+  font-size: 14pt;
+}
+
+div.slide {
+  z-index: 20;
+  margin: 0 0 0 0;
+  padding: 0;
+  border-width: 0;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  /*line-height: 120%;*/
+  background-color: transparent;
+  /*min-width: 600px; 
+  max-width: 1200px; */
+  width: 100%;
+  height:100%;
+  margin: auto;
+  position: relative;
+/*  display:hidden;*/
+}
+
+/* Non-rendering items */
+
+div.build { display: none; }
+div.notes { display: none; }
+div.title { display: none; }
+
+
+div.include {
+    z-index: 100;
+    display: inline;
+}
+
+/* Table of contents */
+
+div#toc {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 10%;
+  height: 100%;
+  padding: 5;
+  background: rgba(0,0,0, 0.8);
+  opacity: 80%;
+  color: black;
+  z-index: 300;
+  overflow: auto;
+  display: none;
+}
+
+div#toc li {
+  width: 100%;
+}
+
+div#toc a {
+  color: white;
+}
+
+div#toc img {
+  width: 100%;
+  height: auto;
+  max-height: 12%;
+}
+
+/* Presentation Controls */
+
+#presentation_controls {
+    position: absolute;
+    top: 90%;
+    left: 30%;
+    background: rgba(0,0,0, 0.3);
+    z-index: 300;
+    margin: 0; 
+    padding: 10 30; 
+    border-radius:10px;
+}
+
+#presentation_controls button {
+    position: relative; 
+    cursor: pointer;
+    width:27;
+    height:27;
+    margin: 2;
+}
+
+#presentation_controls input {
+/*    position: relative; */
+    cursor: pointer;
+    width: 0;
+    height: 0;
+    display: none;
+}
+
+#presentation_controls label {
+    padding:0;
+    margin:2;
+    height:25;
+    width:25;
+}
+
+div#veil {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 200;
+    background: rgba(0,0,0, 0.6);
+    display: none;
+}
+
+div.svg_editor {
+    position:absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom:10%;
+}
+
+
+div#svg_editor_controls{
+    position: absolute;
+    top: 95%;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: #222;
+    display: none;
+    z-index: 250;
+    padding: 5;
+}
+
+.centered_buttons {
+  margin: auto;
+  text-align: center;
+}
+
+#svg_editor_controls button {
+  height: 30;
+  font-size: 12;
+}
+
+
+/* Images */
+
+img {
+  max-width:100%; 
+  max-height:100%;
+}
+
+img.fullscreen {
+  vertical-align: 'center';
+  width: 100%;
+  height: 100%;
+}
+
+.fullscreen svg {
+  width: 100%;
+  height: 100%;
+  display: inline;
+}
+
+.fullscreen img {
+  width: 100%;
+  height: 100%;
+}
+
+.fullscreen embed {
+  width: 100%;
+  height: 100%;
+}
+
+/* Headers and text */
+
+h1,h2,h3 { font-weight: normal; text-align: center; margin: 0.5em 0; }*/
+h1 { font-size: 5em; }
+h2 { font-size: 3em; }
+h3 { font-size: 2em; }
+
+pre { margin: 1em 40px; padding: .25em; }
+
+
+/* Pre-defined positions for text and other stuff */
+.text_right{
+  text-align: right;
+}
+
+.lower_right{
+  position: absolute;
+  bottom: 10%;
+  right:10%;
+  height: 25%;
+}
+
+
+/* Stuff that's not quite working... */
+div.relative_wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  margin: 0;
+}
+
+div.abs_fill {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  margin: 0;
+}
+
+div.centering_container{
+  display: table;
+  position: relative;
+}
+
+div.vertically_centered{
+  display: table-cell;
+  vertical-align: middle;
+  top: 50%;
+  position: absolute;
+/*  vertical-align: center;
+  display: inline-block;*/
+}
+
+
