@@ -1,41 +1,37 @@
- 
-// A quick sample presentation in showboat  
+
+// A quick sample presentation in showboat
 // Note: nice Jade bundles are available for both vim and textmate
 
-.slide
-  .title Title slide
-  
-  .include.fullscreen(src='svg/title.svg')
-  
+.slide(title='Title slide')
+
+  .svg_include.fullscreen(src='svg/title.svg')
+
   // #showboat and #tagline are defined in the svg
   .build fade_in(#title)
   .build fade_in(#tagline)
-  
 
 // Keyboard shortcut tour
 
-.slide
-  .title Keyboard shortcuts
-  
-  .include.fullscreen(src='svg/keyboard.svg')
-  
+.slide(title='Keyboard shortcuts')
+
+  .svg_include(src='svg/keyboard.svg')
+
   .build fade_in(#T)
-  
+
   .build
     | opacity(#T, 0.25)
     | fade_in(#C)
-  
+
   .build
     | opacity(#C, 0.25)
     | fade_in(#E)
-  
+
   .build
     | opacity(#E, 0.25)
     | fade_in(#arrows)
 
 // An example taken from the d3.js website
-.slide
-  .title A d3.js dropped-in example
+.slide(title='A d3.js dropped-in example')
 
   h1 Force-Directed Graph Example (from the d3.js website)
 
@@ -43,21 +39,31 @@
     - d3_root = 'http://mbostock.github.com/d3'
     link(href='#{d3_root}/ex/force.css', rel='stylesheet')
     script(src='#{d3_root}/d3.layout.js?2.7.1')
-    script(src='#{d3_root}/d3.geom.js?2.7.1') 
+    script(src='#{d3_root}/d3.geom.js?2.7.1')
     script(src='scripts/force.js')
+
+
+// A bullet-pointy slide with math included
+
+.slide(title="Here is a list!")
+  h1 This is a boring vanilla slide
+
+  ul
+    li Here is a bullet
+    li here is one with math: $$x = {-b \\pm \\sqrt{b^2-4ac} \\over 2a}.$$
+    li blah
 
 
 // A random swf from a talk I gave long ago
 
-.slide
-  .title Projection onto a principal component basis
+.slide(title='Projection onto a principal component basis')
   .notes Note could go in a section like this
-  
+
   embed(src='swf/PCASpace_simplified.swf', width='100%', height='100%')
+
 
 // And another one
 
-.slide
-  .title Projection on a wavelet basis
-  
+.slide(title='Projection on a wavelet basis')
+
   embed(src='swf/WaveletSpace_simplified.swf', width='100%', height='100%')

@@ -7,9 +7,10 @@ body {
   /*width: 1024;
   height: 768;*/
   color: black;
-  background-color: white;
+  background-color: black;
   font-family: "Myriad Pro", "Myriad", sans-serif;
   font-size: 14pt;
+  font-weight:550;
 }
 
 div.slide {
@@ -21,15 +22,15 @@ div.slide {
   bottom: 0;
   left: 0;
   right: 0;
-  /*line-height: 120%;*/
-  background-color: transparent;
-  /*min-width: 600px; 
-  max-width: 1200px; */
   width: 100%;
   height:100%;
-  margin: auto;
-  position: relative;
+  /*line-height: 120%;*/
+  background-color: white;
+  /*min-width: 600px; 
+  max-width: 1200px; */
+  position: absolute;
 /*  display:hidden;*/
+
 }
 
 /* Non-rendering items */
@@ -37,9 +38,10 @@ div.slide {
 div.build { display: none; }
 div.notes { display: none; }
 div.title { display: none; }
+div.set { display: none; }
 
 
-div.include {
+div.svg_include {
     z-index: 100;
     display: inline;
 }
@@ -163,7 +165,12 @@ img {
   max-height:100%;
 }
 
-img.fullscreen {
+svg {
+  width: 100%;
+  height: 100%;
+}
+
+/*img.fullscreen {
   vertical-align: 'center';
   width: 100%;
   height: 100%;
@@ -183,17 +190,86 @@ img.fullscreen {
 .fullscreen embed {
   width: 100%;
   height: 100%;
+}*/
+
+.centered {
+  /* basic styling */
+  width: 100%;
+  height: 100%;
+
+  /* flexbox, por favor */
+  display: -webkit-box;
+  -webkit-box-orient: horizontal;
+  -webkit-box-pack: center;
+  -webkit-box-align: center;
+ 
+  display: -moz-box;
+  -moz-box-orient: horizontal;
+  -moz-box-pack: center;
+  -moz-box-align: center;
+  
+  display: box;
+  box-orient: horizontal;
+  box-pack: center;
+  box-align: center;
+  
+}
+
+.bullets {
+  height: 100%;
+  width: 100%;
 }
 
 /* Headers and text */
 
-h1,h2,h3 { font-weight: normal; text-align: center; margin: 0.5em 0; }*/
-h1 { font-size: 5em; }
-h2 { font-size: 3em; }
-h3 { font-size: 2em; }
+.slide h1,h2,h3 { 
+    font-weight: bold; 
+    text-align: left; 
+    margin-left: 5%;
+    margin-right: 5%;
+    margin-top: 0;
+    margin-bottom: 0;
+/*    margin: 0.5em 0; */
+}
+.slide h1 { 
+  font-size: 2.8em; 
+  color: #99c;
+  margin-top: 5%;
+}
+.slide h2 { font-size: 2.5em; }
+.slide h3 { font-size: 2.5em; }
 
-pre { margin: 1em 40px; padding: .25em; }
+.slide ul {
+  margin-left: 5%;    
+  margin-right: 5%;
+}
+.slide li { 
+  font-size: 2.2em;   
+  font-weight: bold;
+  margin: .3em 0;
+}
 
+.slide pre { 
+    margin: 1em 40px; 
+    padding: .25em; 
+}
+
+.black {
+  color: #000;
+}
+
+.gray {
+  color: #666;
+}
+
+.red {
+  color: #933;
+}
+
+.right {
+  text-align: right;
+  margin-right: 5%;
+}
 
 /* Pre-defined positions for text and other stuff */
 .text_right{
@@ -203,8 +279,21 @@ pre { margin: 1em 40px; padding: .25em; }
 .lower_right{
   position: absolute;
   bottom: 10%;
-  right:10%;
+  left: 50%;
+  right:5%;
   height: 25%;
+  text-align: right;
+}
+
+.citation {
+  position: absolute;
+  top: 90%;
+  bottom: 0;
+  left:0;
+  right:0;
+  padding: 3%;
+  text-align: right;
+  font-size: 1em;
 }
 
 

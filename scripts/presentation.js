@@ -1,46 +1,52 @@
 (function() {
-  var Presentation, Slide, build_types, n_slides_global,
+  var Presentation, Slide, build_types, exhaustiveSearchByID, n_slides_global, use_html2canvas,
     __slice = Array.prototype.slice;
 
   n_slides_global = 0;
 
+  use_html2canvas = false;
+
   build_types = {
-    appear: function(target) {
+    appear: function(slide, target) {
       return {
         "do": function(cb) {
-          return $(target).show(0, cb);
+          $(target, slide).css('opacity', 1.0);
+          if (cb) return cb();
         },
         undo: function(cb) {
-          return $(target).hide(0, cb);
+          $(target, slide).css('opacity', 0.0);
+          if (cb) return cb();
         }
       };
     },
-    disappear: function(target) {
+    disappear: function(slide, target) {
       return {
         "do": function(cb) {
-          return $(target).hide(0, cb);
+          $(target, slide).css('opacity', 0.0);
+          if (cb) return cb();
         },
         undo: function(cb) {
-          return $(target).show(0, cb);
+          $(target, slide).css('opacity', 1.0);
+          if (cb) return cb();
         }
       };
     },
-    fade_in: function(target, duration) {
+    fade_in: function(slide, target, duration) {
       if (duration == null) duration = 'slow';
       return {
         "do": function(cb) {
-          return $(target).animate({
+          return $(target, slide).animate({
             'opacity': 1.0
           }, duration, cb);
         },
         undo: function(cb) {
-          return $(target).animate({
+          return $(target, slide).animate({
             'opacity': 0.0
           }, 0, cb);
         }
       };
     },
-    fade_out: function(target, duration) {
+    fade_out: function(slide, target, duration) {
       if (duration == null) duration = 'slow';
       return {
         "do": function(cb) {
@@ -55,15 +61,16 @@
         }
       };
     },
-    opacity: function(target, op, duration) {
+    opacity: function(slide, target, op, duration) {
       if (duration == null) duration = 'slow';
       this.last_opacity;
       return {
         "do": function(cb) {
           var lo;
-          this.last_opacity = $(target).css('opacity');
+          console.log('doing opacity');
+          this.last_opacity = $(target, slide).css('opacity');
           lo = this.last_opacity;
-          return $(target).animate({
+          return $(target, slide).animate({
             'opacity': op
           }, duration, cb);
         },
@@ -71,29 +78,30 @@
           var lo;
           if (this.last_opacity !== void 0) {
             lo = this.last_opacity;
-            return $(target).animate({
+            return $(target, slide).animate({
               'opacity': lo
             }, 0, cb);
           } else {
-            if ($(target).css('opacity')) {
-              this.last_opacity = $(target).css('opacity');
+            if ($(target, slide).css('opacity')) {
+              this.last_opacity = $(target, slide).css('opacity');
             }
             if (cb) return cb();
           }
         }
       };
     },
-    play: function(target) {
+    play: function(slide, target) {
       return {
         "do": function(cb) {
           try {
-            $(target).get(0).play();
+            $(target, slide).get(0).play();
           } catch (_error) {}
           if (cb) return cb();
         },
         undo: function(cb) {
           try {
-            $(target).get(0).pause().rewind();
+            $(target, slide).get(0).pause();
+            $(target, slide).get(0).currentTime = 0;
           } catch (_error) {}
           if (cb) return cb();
         }
@@ -102,46 +110,80 @@
     composite: function(subbuilds) {
       return {
         "do": function(cb) {
-          var b, _i, _len;
-          for (_i = 0, _len = subbuilds.length; _i < _len; _i++) {
-            b = subbuilds[_i];
-            b["do"]();
-          }
+          var b, res;
+          res = (function() {
+            var _i, _len, _results;
+            _results = [];
+            for (_i = 0, _len = subbuilds.length; _i < _len; _i++) {
+              b = subbuilds[_i];
+              _results.push(b["do"]());
+            }
+            return _results;
+          })();
+          console.log(res);
           if (cb) return cb();
         },
         undo: function(cb) {
-          var b, _i, _len;
-          for (_i = 0, _len = subbuilds.length; _i < _len; _i++) {
-            b = subbuilds[_i];
-            b.undo();
-          }
+          var b, res;
+          res = (function() {
+            var _i, _len, _results;
+            _results = [];
+            for (_i = 0, _len = subbuilds.length; _i < _len; _i++) {
+              b = subbuilds[_i];
+              _results.push(b.undo());
+            }
+            return _results;
+          })();
           if (cb) return cb();
         }
       };
     }
   };
 
+  exhaustiveSearchByID = function(parent, id) {
+    var child, children, ret, _i, _len;
+    if (parent === null || parent === void 0 || parent.getAttribute === void 0) {
+      return null;
+    }
+    if (parent.getAttribute('id') === id) return $(parent);
+    children = [];
+    if (parent.getChildren !== void 0) children = parent.getChildren();
+    if (parent.childNodes !== void 0) children = parent.childNodes;
+    if (children.length === 0) return null;
+    for (_i = 0, _len = children.length; _i < _len; _i++) {
+      child = children[_i];
+      ret = exhaustiveSearchByID(child, id);
+      if (ret !== null) return ret;
+    }
+    return null;
+  };
+
   Slide = (function() {
 
     Slide.build_list;
 
-    Slide.current_build;
+    Slide.current_build_idx;
 
     function Slide(slide_div) {
-      var bl, unique_id;
+      var bl, slide, unique_id;
       this.slide_div = slide_div;
       this.build_list = [];
-      this.current_build = 0;
+      this.current_build_idx = 0;
       this.first_show = true;
       if (!slide_div.attr('id')) {
         unique_id = 'slide_' + n_slides_global++;
         slide_div.attr('id', unique_id);
       }
       bl = this.build_list;
-      $('.build, .incremental ul li, .incremental > *:not(ul)', this.slide_div).each(function(i) {
-        var args, argstr, b, bstr, matches, matchstr, subbstr, subbstrs, subbuilds, target, type, _i, _len;
+      slide = this;
+      $('.build, .set, .incremental ul li, .incremental li, .incremental > *:not(ul)', this.slide_div).each(function(i) {
+        var args, argstr, b, bstr, build_id, build_obj, composite_build, matches, matchstr, set_directive, subbstr, subbstrs, subbuilds, target, type, _i, _len;
         b = $(this);
-        if (b.hasClass('build')) {
+        set_directive = false;
+        if (b.hasClass('set')) set_directive = true;
+        build_id = 'build_' + (bl.length + 1) + '_' + slide_div.attr('id');
+        b.attr('id', build_id);
+        if (b.hasClass('build') || set_directive) {
           bstr = b.text();
           subbstrs = bstr.split(/\n+|;\n*/);
           subbuilds = [];
@@ -158,23 +200,56 @@
             if ($(target) === null) {
               alert("Invalid target " + target + " in build " + subbstr);
             }
-            subbuilds.push(build_types[type].apply(build_types, [target].concat(__slice.call(args))));
+            target = slide.modifyTargetIdForUniqueness(target);
+            build_obj = build_types[type].apply(build_types, [this.slide_div, target].concat(__slice.call(args)));
+            if (set_directive) {
+              build_obj.undo = build_obj["do"];
+              build_obj["do"] = function() {};
+              build_obj.auto_advance = true;
+            } else {
+              build_obj.auto_advance = false;
+            }
+            subbuilds.push(build_obj);
           }
           if (subbuilds.length === 0) {
-            alert('blah!!');
+            return alert('Unable to build composite build: no sub builds...');
           } else if (subbuilds.length === 1) {
-            bl.push(subbuilds[0]);
+            return bl.push(subbuilds[0]);
           } else {
-            bl.push(build_types['composite'](subbuilds.slice(0).reverse()));
+            composite_build = build_types['composite'](subbuilds.slice(0).reverse());
+            composite_build.auto_advance = subbuilds[0].auto_advance;
+            return bl.push(composite_build);
           }
         } else {
-          bl.push(build_types['appear'](b));
+          return bl.push(build_types['appear'](this.slide_div, '#' + build_id));
         }
-        return b.attr('id', 'build_' + bl.length);
       });
       this.reset();
       return this;
     }
+
+    Slide.prototype.modifyTargetIdForUniqueness = function(target) {
+      var new_target, new_target_sel, slide_id, t, target_id, this_slide;
+      slide_id = this.slide_div.attr('id');
+      this_slide = this.slide_div;
+      target_id = target.replace(/#/g, '');
+      t = this_slide.find(target);
+      console.log(t);
+      new_target = target_id + '_' + slide_id;
+      new_target_sel = '#' + new_target;
+      if (t === void 0 || t === null || t.length === 0) {
+        t = exhaustiveSearchByID($('svg', this_slide).get(0), target_id);
+      }
+      if (t === void 0 || t === null || t.length === 0) {
+        console.log('Could not find element matching target: ' + target);
+        return target;
+      }
+      console.log(t);
+      console.log('modifying ' + target + ' to ' + new_target);
+      t.attr('id', new_target);
+      console.log('now: ' + t.attr('id') + ', ' + t);
+      return new_target_sel;
+    };
 
     Slide.prototype.getDiv = function() {
       return this.slide_div;
@@ -182,12 +257,13 @@
 
     Slide.prototype.reset = function() {
       var build, _i, _len, _ref;
+      console.log('reseting: ' + this.slide_div.eq(0).attr('id'));
       _ref = this.build_list.slice(0).reverse();
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         build = _ref[_i];
         build.undo();
       }
-      return this.current_build = 0;
+      return this.current_build_idx = 0;
     };
 
     Slide.prototype.fullReset = function() {
@@ -199,22 +275,28 @@
     };
 
     Slide.prototype.doNextBuild = function() {
-      if (this.current_build >= this.build_list.length) {
+      var current_build;
+      if (this.current_build_idx >= this.build_list.length) {
         return false;
       } else {
-        this.build_list[this.current_build]["do"]();
-        this.current_build += 1;
+        current_build = this.build_list[this.current_build_idx];
+        current_build["do"]();
+        this.current_build_idx += 1;
+        if (current_build.auto_advance) return this.doNextBuild();
         return true;
       }
     };
 
     Slide.prototype.undoPreviousBuild = function() {
-      this.current_build -= 1;
-      if (this.current_build < 0) {
-        this.current_build = 0;
+      var current_build;
+      this.current_build_idx -= 1;
+      if (this.current_build_idx < 0) {
+        this.current_build_idx = 0;
         return false;
       } else {
-        this.build_list[this.current_build].undo();
+        current_build = this.build_list[this.current_build_idx];
+        current_build.undo();
+        if (current_build.auto_advance) return this.undoPreviousBuild();
         return true;
       }
     };
@@ -230,7 +312,7 @@
 
     Slide.prototype.refreshVisibility = function(parent) {
       var includes;
-      includes = $('.include', parent);
+      includes = $('.svg_include', parent);
       return includes.each(function() {
         var local_parent;
         local_parent = $(this);
@@ -257,11 +339,17 @@
     Presentation.current_slide_idx = 0;
 
     function Presentation() {
-      var sl,
+      var base_font_size, sl,
         _this = this;
       this.slides = [];
       this.current_slide_idx = 0;
-      this.loadIncludes();
+      base_font_size = parseFloat($('body').css('font-size'));
+      this.adjustBaseFontSize(base_font_size);
+      window.onresize = function(evt) {
+        return _this.adjustBaseFontSize(base_font_size);
+      };
+      this.unique_number = 0;
+      this.loadIncludes(false);
       sl = this.slides;
       $('.slide').each(function(i) {
         var s;
@@ -271,19 +359,53 @@
       this.checkURLBarLocation();
       this.showCurrent();
       this.initControls();
+      this.buildTOC();
       document.onkeydown = function(evt) {
         return _this.keyDown(evt);
       };
-      this.buildTOC();
+      document.onkeyup = function(evt) {
+        return _this.keyUp(evt);
+      };
+      $('#presentation').bind('tap', function(evt) {
+        return _this.advanceQueued();
+      });
+      $('#presentation').bind('swipeleft', function(evt) {
+        return _this.advanceSlideQueued();
+      });
+      $('#presentation').bind('swiperight', function(evt) {
+        _this.revertSlideQueued();
+        return _this.resetCurrentQueued();
+      });
       this.checkURLBarPeriodically(100);
       this.actions = $({});
-      this.unique_number = 0;
     }
 
-    Presentation.prototype.loadIncludes = function() {
+    Presentation.prototype.adjustBaseFontSize = function(base_font_size, ref_width, ref_height) {
+      var current_aspect, factor, height, new_font_size, ref_aspect, width;
+      if (ref_width == null) ref_width = 1024;
+      if (ref_height == null) ref_height = 768;
+      width = window.innerWidth;
+      height = window.innerHeight;
+      current_aspect = height / width;
+      ref_aspect = ref_height / ref_width;
+      console.log(current_aspect);
+      console.log(ref_aspect);
+      console.log(base_font_size);
+      if (current_aspect >= ref_aspect) {
+        factor = height / ref_height;
+      } else {
+        factor = width / ref_width;
+      }
+      new_font_size = factor * base_font_size;
+      console.log('Setting new font size: ' + new_font_size);
+      return $('body').css('font-size', new_font_size);
+    };
+
+    Presentation.prototype.loadIncludes = function(async) {
       var p;
+      if (async == null) async = false;
       p = this;
-      $('.include').each(function(i) {
+      return $('.svg_include').each(function(i) {
         var div, path;
         div = $(this);
         div.empty();
@@ -291,20 +413,17 @@
         path = div.attr('src') + '?' + p.unique_number;
         console.log('path: ' + path);
         if (div) {
-          return $.get(path, function(xml) {
-            console.log("div: " + div + ", xml: " + xml.documentElement);
-            div.get(0).appendChild(xml.documentElement);
-            return p.showCurrent(function() {
-              return p.resetCurrent();
-            });
+          return $.ajax({
+            url: path,
+            async: async,
+            success: function(xml) {
+              return div.get(0).appendChild(xml.documentElement);
+            },
+            error: function(err) {
+              return div.append($("<p>An error occurred loading " + path + "</p>"));
+            }
           });
         }
-      });
-      return $('g').each(function(i) {
-        var op;
-        op = $(this).css('opacity');
-        console.log("opacity = " + op);
-        if ($(this).css('opacity') === void 0) return $(this).css('opacity', 1.0);
       });
     };
 
@@ -332,6 +451,36 @@
       a = this.actions;
       a.queue('user_interaction', function() {
         return p.revert();
+      });
+      return a.dequeue('user_interaction');
+    };
+
+    Presentation.prototype.advanceSlideQueued = function() {
+      var a, p;
+      p = this;
+      a = this.actions;
+      a.queue('user_interaction', function() {
+        return p.advanceSlide();
+      });
+      return a.dequeue('user_interaction');
+    };
+
+    Presentation.prototype.revertSlideQueued = function() {
+      var a, p;
+      p = this;
+      a = this.actions;
+      a.queue('user_interaction', function() {
+        return p.revertSlide();
+      });
+      return a.dequeue('user_interaction');
+    };
+
+    Presentation.prototype.resetSlideQueued = function() {
+      var a, p;
+      p = this;
+      a = this.actions;
+      a.queue('user_interaction', function() {
+        return p.resetCurrent();
       });
       return a.dequeue('user_interaction');
     };
@@ -379,6 +528,12 @@
       return this.slides[this.current_slide_idx].undoPreviousBuild();
     };
 
+    Presentation.prototype.keyUp = function(evt) {
+      var key;
+      key = evt.keyCode;
+      if (key === 16) return this.shiftKeyActive = false;
+    };
+
     Presentation.prototype.keyDown = function(evt) {
       var key;
       key = evt.keyCode;
@@ -387,20 +542,25 @@
         case 16:
           return this.shiftKeyActive = true;
         case 32:
-          if (this.shiftKeyActive) {
-            return this.advance();
-          } else {
-            return this.revert();
-          }
-          break;
+          return this.advance();
         case 37:
         case 33:
         case 38:
-          return this.revertQueued();
+          if (this.shiftKeyActive) {
+            return this.revertSlideQueued();
+          } else {
+            return this.revertQueued();
+          }
+          break;
         case 39:
         case 34:
         case 30:
-          return this.advanceQueued();
+          if (this.shiftKeyActive) {
+            return this.advanceSlideQueued();
+          } else {
+            return this.advanceQueued();
+          }
+          break;
         case 67:
           return this.toggleControls();
         case 82:
@@ -508,22 +668,26 @@
       return this.editPickerMode(!this.edit_picker_enabled);
     };
 
-    Presentation.prototype.editPickerMode = function(edit_picker_enabled, external, save) {
+    Presentation.prototype.editPickerMode = function(edit_picker_enable, external, save) {
       var current, p;
-      this.edit_picker_enabled = edit_picker_enabled;
+      this.edit_picker_enable = edit_picker_enable;
       if (save == null) save = true;
       p = this;
       current = p.currentSlideDiv();
-      if (p.edit_picker_enabled) {
+      if (p.edit_picker_enable) {
+        if ($('.svg_include', current).length === 1) {
+          p.inplaceEdit($('.svg_include', current).eq(0));
+          return;
+        }
         this.transientMessage('Click on an SVG to edit');
         if (external) {
-          return $('.include').on('click.edit_include', function() {
+          return $('.svg_include').on('click.edit_include', function() {
             $.get('edit/' + $(this).attr('src'));
             return $('#veil').fadeIn('slow');
           });
         } else {
-          $('.include', current).css('background', 'rgb(0.5,0.5,0.5)');
-          return $('.include', current).on('click.edit_include', function() {
+          $('.svg_include', current).css('background', 'rgb(0.5,0.5,0.5)');
+          return $('.svg_include', current).on('click.edit_include', function() {
             return p.inplaceEdit($(this));
           });
         }
@@ -544,8 +708,8 @@
 
     Presentation.prototype.reloadAfterEdit = function() {
       this.edit_picker_enabled = false;
-      $('.include').removeClass('svg_editor');
-      $('.include').unbind('click.edit_include');
+      $('.svg_include').removeClass('svg_editor');
+      $('.svg_include').unbind('click.edit_include');
       this.loadIncludes();
       this.showCurrent(this.resetCurrent());
       this.setEditorSVGCanvas(void 0);
@@ -669,9 +833,16 @@
       ol = $('<ol></ol>');
       p = this;
       $.each(anchors[0], function(i, a) {
-        var li;
+        var li, thumb_div;
         li = $('<li></li>');
-        a.append("<img src=\"thumbnails/slide_" + (i + 1) + "-thumb.png\" width=\"200\" height=\"150\" alt=\"\"/>");
+        if (use_html2canvas) {
+          thumb_div = $('<div width="100%" height="100%"/>');
+          li.append(thumb_div);
+          p.generateThumbnailForSlide(i, thumb_div);
+          a.append(thumb_div);
+        } else {
+          a.append("<img src=\"thumbnails/slide_" + (i + 1) + "-thumb.png\" width=\"200\" height=\"150\" alt=\"\"/>");
+        }
         li.append(a);
         return ol.append(li);
       });
@@ -679,7 +850,7 @@
     };
 
     Presentation.prototype.toggleTOC = function() {
-      return $('#toc').fadeToggle();
+      return $('#toc').toggle();
     };
 
     Presentation.prototype.checkURLBarLocation = function() {
