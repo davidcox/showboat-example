@@ -19,8 +19,8 @@
   @build fade_in(#T)
 
   @build
-    | opacity(#T, 0.25)
     | fade_in(#C)
+    | opacity(#T, 0.25)
 
   @build
     | opacity(#C, 0.25)
@@ -30,28 +30,30 @@
     | opacity(#E, 0.25)
     | fade_in(#arrows)
 
+// A bullet-pointy slide with math included
+
+@slide(title="Here is a list!")
+  h1 This is a boring vanilla slide
+
+  ul.incremental
+    li Here is a bullet
+    li here is one with math: \( x = {-b \pm \sqrt {b^2-4ac} \over 2a} \)
+    li blah
+
+
 // An example taken from the d3.js website
 @slide(title='A d3.js dropped-in example')
 
   h1 Force-Directed Graph Example (from the d3.js website)
 
   .gallery.fullscreen#chart
-    - d3_root = '/scripts/d3'
-    link(href='/css/force.css', rel='stylesheet')
-    script(src='#{d3_root}/d3.layout.js?2.7.1')
-    script(src='#{d3_root}/d3.geom.js?2.7.1')
+    - d3_root = 'scripts/d3'
+    link(href='css/force.css', rel='stylesheet')
+    script(src='#{d3_root}/d3.layout.js')
+    script(src='#{d3_root}/d3.geom.js')
     script(src='scripts/force.js')
 
 
-// A bullet-pointy slide with math included
-
-@slide(title="Here is a list!")
-  h1 This is a boring vanilla slide
-
-  ul
-    li Here is a bullet
-    li here is one with math: $$x = {-b \\pm \\sqrt {b^2-4ac} \\over 2a}.$$
-    li blah
 
 
 // A random swf from a talk I gave long ago
@@ -67,3 +69,7 @@
 @slide(title='Projection on a wavelet basis')
 
   embed(src='swf/WaveletSpace_simplified.swf', width='100%', height='100%')
+
+@slide(title='Wolfram CDF')
+  <script type='text/javascript' src='http://demonstrations.wolfram.com/javascript/embed.js' ></script><script type='text/javascript'>var demoObj = new DEMOEMBED(); demoObj.run('NeuronalBursting', '', '543', '405');</script><div id='DEMO_NeuronalBursting'><a class='demonstrationHyperlink' href='http://demonstrations.wolfram.com/NeuronalBursting/' target='_blank'>Neuronal Bursting</a> from the <a class='demonstrationHyperlink' href='http://demonstrations.wolfram.com/' target='_blank'>Wolfram Demonstrations Project</a> by Garrett Neske</div>
+
