@@ -2,6 +2,16 @@
 // A quick sample presentation in showboat
 // Note: nice Jade bundles are available for both vim and textmate
 
+// “Power corrupts, PowerPoint corrupts absolutely.” -- Edward Tufte
+// “PowerPoint doesn’t kill meetings. People kill meetings. But using PowerPoint is like having a loaded AK-47 on the table: You can do very bad things with it.” -- Peter Norvig
+
+@slide(title='Tufte')
+  img(src='images/tufte.png', height='100%', width='auto')
+
+
+@slide(title='Norvig')
+  img(src='images/norvig.png', height='100%', width='auto')
+
 @slide(title='Title slide')
 
   .svg_include.fullscreen(src='svg/title.svg')
@@ -54,8 +64,6 @@
     script(src='scripts/force.js')
 
 
-
-
 // A random swf from a talk I gave long ago
 
 @slide(title='Projection onto a principal component basis')
@@ -73,3 +81,6 @@
 @slide(title='Wolfram CDF')
   <script type='text/javascript' src='http://demonstrations.wolfram.com/javascript/embed.js' ></script><script type='text/javascript'>var demoObj = new DEMOEMBED(); demoObj.run('NeuronalBursting', '', '543', '405');</script><div id='DEMO_NeuronalBursting'><a class='demonstrationHyperlink' href='http://demonstrations.wolfram.com/NeuronalBursting/' target='_blank'>Neuronal Bursting</a> from the <a class='demonstrationHyperlink' href='http://demonstrations.wolfram.com/' target='_blank'>Wolfram Demonstrations Project</a> by Garrett Neske</div>
 
+
+@slide(title='QR code')
+  img(src='images/qr.png', width=600, height=600)
